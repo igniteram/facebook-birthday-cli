@@ -15,7 +15,7 @@
 
 Facebook-Birthday-CLI is an interactive command line interface which helps in wishing your facebook friends and automate the wishes for you so that you never miss your friends birthday's.
 
-<img src= "./images/fb.gif" height= 250 alt="fb.gif"/>
+<img src= "./images/fb.gif" height= 300 alt="fb.gif"/>
 
 ## Why the hell should I use this?
 
