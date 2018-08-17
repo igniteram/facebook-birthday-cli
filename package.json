@@ -1,0 +1,49 @@
+{
+  "name": "facebook-birthday-cli",
+  "version": "0.1.2",
+  "description": "Never miss out to wish your facebook friends!",
+  "main": "index.js",
+  "scripts": {
+    "prebuild": "npm run format",
+    "build": "tsc",
+    "clean": "rimraf built/",
+    "clean-build": "npm run clean && npm run build",
+    "format": "clang-format -i --glob='+(lib|test)/**/*.ts'",
+    "lint": "tslint -c tslint.json 'lib/**/*.ts'",
+    "prepublish": "npm run clean-build",
+    "pretest": "npm run lint",
+    "test": "jest",
+    "compile": "tsc -w"
+  },
+  "keywords": [
+    "facebook",
+    "node",
+    "command line interface",
+    "puppeteer",
+    "google chrome"
+  ],
+  "author": "Ram Pasala<ram.pasala7@gmail.com>",
+  "license": "MIT",
+  "bin": {
+    "facebook": "bin/facebook"
+  },
+  "dependencies": {
+    "commander": "^2.16.0",
+    "get-installed-path": "^4.0.8",
+    "inquirer": "^6.0.0",
+    "puppeteer": "^1.6.1"
+  },
+  "devDependencies": {
+    "@types/chalk": "^2.2.0",
+    "@types/commander": "^2.12.2",
+    "@types/inquirer": "0.0.42",
+    "@types/jest": "^23.1.6",
+    "@types/node": "^10.5.2",
+    "@types/puppeteer": "^1.5.0",
+    "chalk": "^2.4.1",
+    "clang-format": "^1.2.4",
+    "tslint": "^5.10.0",
+    "tslint-eslint-rules": "^5.3.1",
+    "typescript": "^2.9.2"
+  }
+}

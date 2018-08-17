@@ -1,0 +1,24 @@
+{
+  "compilerOptions": {
+    "target": "es6",
+    "module": "commonjs",
+    "moduleResolution": "node",
+    "sourceMap": true,
+    "declaration": true,
+    "removeComments": false,
+    "noImplicitAny": true,
+    "outDir": "built/",
+    "typeRoots": [ "./node_modules/@types","./built" ],
+    "types": [
+      "node",
+      "inquirer",
+      "commander",
+      "jest"
+    ]
+  },
+  "exclude": [
+    "built",
+    "node_modules",
+    "test"
+  ]
+}
