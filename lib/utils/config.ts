@@ -12,14 +12,12 @@ const writeFileAsync = promisify(fs.writeFile.bind(fs));
 async function writeFile(file: any) {
   try {
     await writeFileAsync(
-        path.join(await getInstalledPath('facebook-birthday-cli'),
-                  '/resources/config.json'),
+        path.join(await getInstalledPath('facebook-birthday-cli'), '/resources/config.json'),
         JSON.stringify(file, null, 4));
   } catch (Exception) {
     console.error(
-        chalk.red(
-            '\nFailed to update config.json file! Most likely due to below reason: ') +
-        '\n' + Exception.toString());
+        chalk.red('\nFailed to update config.json file! Most likely due to below reason: ') + '\n' +
+        Exception.toString());
   }
 }
 async function encryptCredentials(answers: any) {

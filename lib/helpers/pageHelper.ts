@@ -4,7 +4,6 @@ import {Browser, ElementHandle, launch, Page, Response} from 'puppeteer';
 import {locators} from './locators';
 
 class PageHelper {
-
   private browser: Browser;
   private page: Page;
   private readonly retryCount: number = 3;
@@ -17,8 +16,8 @@ class PageHelper {
   public async init() {
     try {
       this.browser = await launch({
-        headless : true,
-        args : [ '--disable-notifications', '--start-maximized' ],
+        headless: true,
+        args: ['--disable-notifications', '--start-maximized'],
       });
       this.page = await this.browser.newPage();
     } catch (Exception) {
@@ -289,8 +288,7 @@ class PageHelper {
    * @param  {any} answers
    * @returns Promise
    */
-  public async enterAllElementText(elements: ElementHandle[],
-                                   text: string): Promise<any> {
+  public async enterAllElementText(elements: ElementHandle[], text: string): Promise<any> {
     try {
       if (elements.length > 0) {
         for (let i = 0; i < elements.length; i++) {
@@ -313,8 +311,8 @@ class PageHelper {
    * @param  {string} text
    * @returns Promise
    */
-  public async enterElementText(index: number, elements: ElementHandle[],
-                                text: string): Promise<void> {
+  public async enterElementText(index: number, elements: ElementHandle[], text: string):
+      Promise<void> {
     try {
       if (elements.length > 0) {
         return await this.enterText(elements[index], text);
@@ -337,7 +335,9 @@ class PageHelper {
       try {
         return await this.page.evaluate((element) => {
           const els = Array.from(document.querySelectorAll(element));
-          return els.map((el) => { return el.textContent; });
+          return els.map((el) => {
+            return el.textContent;
+          });
         }, element);
       } catch (Exception) {
         try {
@@ -373,7 +373,7 @@ class PageHelper {
     let i: number = 0;
     while (i < this.retryCount) {
       try {
-        await this.page.waitForSelector(element, {timeout : 1000});
+        await this.page.waitForSelector(element, {timeout: 1000});
         if (await this.page.$(element) !== null) {
           return true;
         }
@@ -400,8 +400,8 @@ class PageHelper {
             return false;
           }
           const style = window.getComputedStyle(el);
-          return style && style.display !== 'none' &&
-                 style.visibility !== 'hidden' && style.opacity !== '0';
+          return style && style.display !== 'none' && style.visibility !== 'hidden' &&
+              style.opacity !== '0';
         });
         return isVisible;
       } catch (Exception) {
