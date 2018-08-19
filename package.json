@@ -1,19 +1,20 @@
 {
   "name": "facebook-birthday-cli",
-  "version": "0.1.3",
+  "version": "0.2.0",
   "description": "Never miss out to wish your facebook friends!",
-  "main": "index.js",
+  "main": "built/cli.js",
   "scripts": {
-    "prebuild": "npm run format",
+    "prebuild": "npm run format && npm run reset",
     "build": "tsc",
     "clean": "rimraf built/",
     "clean-build": "npm run clean && npm run build",
     "format": "clang-format -i --glob='+(lib|test)/**/*.ts'",
     "lint": "tslint -c tslint.json 'lib/**/*.ts'",
-    "prepublish": "npm run clean-build",
+    "prepare": "npm run clean-build",
     "pretest": "npm run lint",
     "test": "jest",
-    "compile": "tsc -w"
+    "compile": "tsc -w",
+    "reset": "facebook wish --reset"
   },
   "keywords": [
     "facebook",
@@ -45,5 +46,9 @@
     "tslint": "^5.10.0",
     "tslint-eslint-rules": "^5.3.1",
     "typescript": "^2.9.2"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/igniteram/facebook-birthday-cli.git"
   }
 }
