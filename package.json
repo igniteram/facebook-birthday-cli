@@ -4,7 +4,7 @@
   "description": "Never miss out to wish your facebook friends!",
   "main": "built/cli.js",
   "scripts": {
-    "prebuild": "npm run format && npm run reset",
+    "prebuild": "npm run format",
     "build": "tsc",
     "clean": "rimraf built/",
     "clean-build": "npm run clean && npm run build",
@@ -13,8 +13,7 @@
     "prepare": "npm run clean-build",
     "pretest": "npm run lint",
     "test": "jest",
-    "compile": "tsc -w",
-    "reset": "facebook wish --reset"
+    "compile": "tsc -w"
   },
   "keywords": [
     "facebook",

@@ -11,24 +11,27 @@ const loginText: string = '\nPlease wait! Logging in...\n';
 
 program.version(pkg.version)
     .description('Facebook Birthday CLI')
-    .command('*', '', {noHelp : true, isDefault : true})
-    .action(() => { program.help(); });
+    .command('*', '', {noHelp: true, isDefault: true})
+    .action(() => {
+      program.help();
+    });
 
 program.command('wish')
     .alias('w')
     .description('Facebook wish command')
     .option('-a, --all', 'wish all friends')
-    .option('-r, --reset',
-            'resets all config values to default') // add option to reset all
-                                                   // saved settings!
-    .action(async (options: any) => {              // add try catch block
+    .option(
+        '-r, --reset',
+        'resets all config values to default')  // add option to reset all
+                                                // saved settings!
+    .action(async (options: any) => {           // add try catch block
       try {
         if (options.reset) {
           config.firstLogin = true;
           config.save = false;
           const keys = Object.keys(config);
           for (let i: number = 2; i < 5; i++) {
-            config[keys[i]] = "";
+            config[keys[i]] = '';
           }
           config.day = 1;
           config.birthdayNames = [];
@@ -38,22 +41,22 @@ program.command('wish')
           process.exit(0);
         }
         const Wisher = new BirthdayWisher();
-        let credentials: any; // change to meaningful name
+        let credentials: any;  // change to meaningful name
         if (config.firstLogin) {
           console.log('\n');
           config.day = new Date().getDay();
           await writeFile(config);
           credentials = await inquirer.prompt([
             {
-              message : 'Please enter your facebook username:',
-              name : 'username',
-              type : 'input',
+              message: 'Please enter your facebook username:',
+              name: 'username',
+              type: 'input',
             },
             {
-              message : 'Please enter your facebook password:',
-              name : 'password',
-              mask : '*',
-              type : 'password',
+              message: 'Please enter your facebook password:',
+              name: 'password',
+              mask: '*',
+              type: 'password',
             }
           ]);
           console.log(chalk.yellowBright(loginText));
@@ -71,16 +74,16 @@ program.command('wish')
             wishes.splice(wishes.indexOf('custom message'), 1);
             const answer: any = await inquirer.prompt([
               {
-                choices : wishes,
-                message : 'Select your favourite birthday wish:',
-                name : 'wish',
-                type : 'list',
+                choices: wishes,
+                message: 'Select your favourite birthday wish:',
+                name: 'wish',
+                type: 'list',
               },
               {
-                default : true,
-                message : 'Do you want to save this configuration?',
-                name : 'config',
-                type : 'confirm',
+                default: true,
+                message: 'Do you want to save this configuration?',
+                name: 'config',
+                type: 'confirm',
               }
             ]);
             if (answer.config) {
