@@ -9,6 +9,9 @@ import {promisify} from 'util';
 
 const writeFileAsync = promisify(fs.writeFile.bind(fs));
 
+/**
+ * @param  {any} file
+ */
 async function writeFile(file: any) {
   try {
     await writeFileAsync(
@@ -20,7 +23,11 @@ async function writeFile(file: any) {
         Exception.toString());
   }
 }
-async function encryptCredentials(answers: any) {
+
+/**
+ * @param  {any} answers
+ */
+function encryptCredentials(answers: any) {
   try {
     config.username = encrypt(answers.username);
     config.password = encrypt(answers.password);
@@ -29,6 +36,9 @@ async function encryptCredentials(answers: any) {
   }
 }
 
+/**
+ * @param  {any} answers
+ */
 function decryptCredentials(answers: any) {
   try {
     answers.username = decrypt(config.username);

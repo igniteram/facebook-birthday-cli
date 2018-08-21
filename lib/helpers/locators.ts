@@ -18,7 +18,7 @@ const locators: Locator = {
   logoutButton: '//span[contains(text(),"Log Out")]',
   birthdayTodayCard: 'div#birthdays_today_card',
   birthdayNames: 'div._fbBirthdays__todayCard > div:nth-child(2) a:not([href*="friendship"])',
-  birthdayText: 'div._fbBirthdays__todayCard > div:nth-child(2) textarea'
+  birthdayText: 'div._fbBirthdays__todayCard > div:nth-child(2) textarea',
 };
 
 export {locators};

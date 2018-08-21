@@ -39,7 +39,7 @@ class BirthdayWisher {
         name: 'customWish',
         type: 'input',
         when: (birthdayAnswers: any) => birthdayAnswers.wish.indexOf('custom message') > -1,
-      }
+      },
     ]);
   }
   /**
