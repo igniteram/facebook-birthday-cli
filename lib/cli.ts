@@ -57,7 +57,7 @@ program.command('wish')
               name: 'password',
               mask: '*',
               type: 'password',
-            }
+            },
           ]);
           console.log(chalk.yellowBright(loginText));
           await Wisher.login(credentials);
@@ -84,7 +84,7 @@ program.command('wish')
                 message: 'Do you want to save this configuration?',
                 name: 'config',
                 type: 'confirm',
-              }
+              },
             ]);
             if (answer.config) {
               config.save = true;

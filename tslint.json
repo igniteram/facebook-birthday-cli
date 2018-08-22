@@ -18,6 +18,7 @@
       "triple-equals": [true, "allow-null-check"],
       "interface-name" : [true, "never-prefix"],
       "no-shadowed-variable": false,
+      "prefer-for-of": false,
       "trailing-comma": [
         true,
         {
