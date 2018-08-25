@@ -373,15 +373,16 @@ class PageHelper {
     let i: number = 0;
     while (i < this.retryCount) {
       try {
-        if (await this.page.$(element) !== null) {
-          await this.page.waitForSelector(element, {timeout: 1000});
+        await this.page.waitForSelector(element, {timeout: 1000});
+        if ((await this.page.$(element)) !== null) {
           return true;
+        } else {
+          return false;
         }
-        return false;
       } catch (Exception) {
         i++;
         if (i === this.retryCount) {
-          throw new Error(Exception.toString());
+          return false;
         }
       }
     }
