@@ -20,11 +20,8 @@ program.command('wish')
     .alias('w')
     .description('Facebook wish command')
     .option('-a, --all', 'wish all friends')
-    .option(
-        '-r, --reset',
-        'resets all config values to default')  // add option to reset all
-                                                // saved settings!
-    .action(async (options: any) => {           // add try catch block
+    .option('-r, --reset', 'resets all config values to default')
+    .action(async (options: any) => {
       try {
         if (options.reset) {
           config.firstLogin = true;
@@ -41,7 +38,7 @@ program.command('wish')
           process.exit(0);
         }
         const Wisher = new BirthdayWisher();
-        let credentials: any;  // change to meaningful name
+        let credentials: any;
         if (config.firstLogin) {
           console.log('\n');
           config.day = new Date().getDay();
@@ -91,16 +88,15 @@ program.command('wish')
               config.wish = answer.wish;
               await writeFile(config);
             }
-            await Wisher.findAndWishAll(answer.wish);
+            await Wisher.findAndWishAll(credentials, answer.wish);
           } else {
-            await Wisher.findAndWishAll(config.wish);
+            await Wisher.findAndWishAll(credentials, config.wish);
           }
         }
       } catch (Exception) {
         console.error(chalk.red('\n' + Exception.toString() + '\n'));
         process.exit(0);
       }
-
     });
 
 program.parse(process.argv);

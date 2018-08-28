@@ -73,29 +73,21 @@ class BirthdayWisher {
               '\n' + Exception.toString());
         }
       } catch (Exception) {
-        throw new Error(Exception.toString());
+        throw Exception;
       }
     }
   }
   /**
-   * @returns Promise
+   * @returns Promise<string[]>
    */
   public async fetchBirthdayNames(): Promise<string[]> {
-    try {
-      return await this.page.getText(locators.birthdayNames);
-    } catch (Exception) {
-      throw new Error(Exception.toString());
-    }
+    return await this.page.getText(locators.birthdayNames);
   }
   /**
-   * @returns Promise
+   * @returns Promise<ElementHandle[]>
    */
   public async fetchAllTexts(): Promise<ElementHandle[]> {
-    try {
-      return await this.page.$$(locators.birthdayText);
-    } catch (Exception) {
-      throw new Error(Exception.toString());
-    }
+    return await this.page.$$(locators.birthdayText);
   }
 
   /**
@@ -103,17 +95,56 @@ class BirthdayWisher {
    * @param  {ElementHandle[]} birthdayTexts
    */
   public async wishAll(birthdayNames: string[], birthdayTexts: ElementHandle[], wish: string) {
-    try {
-      await this.page.enterAllElementText(birthdayTexts, wish);
-      console.log(chalk.green('\nSuccessfully wished:\n'));
-      birthdayNames.forEach((name: string) => {
-        console.log(chalk.green(name + '\n'));
-      });
-    } catch (Exception) {
-      throw new Error(Exception.toString());
-    }
+    await this.page.enterAllElementText(birthdayTexts, wish);
+    console.log(chalk.green('\nSuccessfully wished:\n'));
+    birthdayNames.forEach((name: string) => {
+      console.log(chalk.green(name + '\n'));
+    });
   }
 
+  /**
+   * @param  {string[]} birthdayNames
+   * @param  {ElementHandle[]} birthdayTexts
+   */
+  public async birthdayWish(
+      credentials: any, birthdayNames: string[], birthdayTexts: ElementHandle[]) {
+    let indexOfBirthdayName: number;
+    const birthdayAnswers: any = await this.birthdayQuestions(birthdayNames);
+    indexOfBirthdayName = birthdayNames.indexOf(birthdayAnswers.birthdayName);
+
+    if (birthdayAnswers.wish.indexOf('custom message') > 0) {
+      await this.page.enterElementText(
+          indexOfBirthdayName, birthdayTexts, birthdayAnswers.customWish);
+
+    } else {
+      await this.page.enterElementText(indexOfBirthdayName, birthdayTexts, birthdayAnswers.wish);
+    }
+    console.log(chalk.green('\nSuccessfully wished ' + birthdayAnswers.birthdayName) + '\n');
+    birthdayNames.splice(indexOfBirthdayName, 1);
+    config.birthdayNames = birthdayNames;
+    await writeFile(config);
+
+    if (birthdayNames.length > 0) {
+      const moreWishes: any = await inquirer.prompt([
+        {
+          default: true,
+          message: 'Do you want to wish more of your friends?',
+          name: 'friends',
+          type: 'confirm',
+        },
+      ]);
+      if (moreWishes.friends) {
+        await this.birthdayWish(credentials, birthdayNames, birthdayTexts);
+      } else {
+        await encryptCredentials(credentials);
+        config.firstLogin = false;
+        await writeFile(config);
+      }
+    }
+  }
+  /**
+   * @param  {any} credentials
+   */
   public async findAndWish(credentials: any) {
     try {
       if (await this.page.isElementExists(locators.birthdayTodayCard)) {
@@ -150,12 +181,15 @@ class BirthdayWisher {
         await this.page.logout();
         process.exit(0);
       } catch (Exception) {
-        throw new Error(Exception.toString());
+        throw Exception;
       }
     }
   }
-
-  public async findAndWishAll(wish: string) {
+  /**
+   * @param  {any} credentials
+   * @param  {string} wish
+   */
+  public async findAndWishAll(credentials: any, wish: string) {
     try {
       if (await this.page.isElementExists(locators.birthdayTodayCard)) {
         const birthdayNames = await this.fetchBirthdayNames();
@@ -165,11 +199,13 @@ class BirthdayWisher {
         } else {
           await this.wishAll(birthdayNames, birthdayTexts, wish);
         }
-
       } else {
         console.error(
             '\n' + chalk.red('Uh oh, looks like none of your friends have birthdays today!\n'));
       }
+      await encryptCredentials(credentials);
+      config.firstLogin = false;
+      await writeFile(config);
       await this.page.logout();
       process.exit(0);
     } catch (Exception) {
@@ -178,54 +214,8 @@ class BirthdayWisher {
         await this.page.logout();
         process.exit(0);
       } catch (Exception) {
-        throw new Error(Exception.toString());
+        throw Exception;
       }
-    }
-  }
-
-  /**
-   * @param  {string[]} birthdayNames
-   * @param  {ElementHandle[]} birthdayTexts
-   */
-  public async birthdayWish(
-      credentials: any, birthdayNames: string[], birthdayTexts: ElementHandle[]) {
-    try {
-      let indexOfBirthdayName: number;
-      const birthdayAnswers: any = await this.birthdayQuestions(birthdayNames);
-      indexOfBirthdayName = birthdayNames.indexOf(birthdayAnswers.birthdayName);
-
-      if (birthdayAnswers.wish.indexOf('custom message') > 0) {
-        await this.page.enterElementText(
-            indexOfBirthdayName, birthdayTexts, birthdayAnswers.customWish);
-
-      } else {
-        await this.page.enterElementText(indexOfBirthdayName, birthdayTexts, birthdayAnswers.wish);
-      }
-      console.log(chalk.green('\nSuccessfully wished ' + birthdayAnswers.birthdayName) + '\n');
-      birthdayNames.splice(indexOfBirthdayName, 1);
-      config.birthdayNames = birthdayNames;
-      await writeFile(config);
-
-      if (birthdayNames.length > 0) {
-        const moreWishes: any = await inquirer.prompt([
-          {
-            default: true,
-            message: 'Do you want to wish more of your friends?',
-            name: 'friends',
-            type: 'confirm',
-          },
-        ]);
-        if (moreWishes.friends) {
-          await this.birthdayWish(credentials, birthdayNames, birthdayTexts);
-        } else {
-          await encryptCredentials(credentials);
-          config.firstLogin = false;
-          await writeFile(config);
-        }
-      }
-
-    } catch (Exception) {
-      throw new Error(Exception.toString());
     }
   }
 }

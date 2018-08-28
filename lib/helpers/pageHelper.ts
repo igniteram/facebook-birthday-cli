@@ -14,15 +14,11 @@ class PageHelper {
   }
 
   public async init() {
-    try {
-      this.browser = await launch({
-        headless: true,
-        args: ['--disable-notifications', '--start-maximized'],
-      });
-      this.page = await this.browser.newPage();
-    } catch (Exception) {
-      throw new Error(Exception.toString());
-    }
+    this.browser = await launch({
+      headless: true,
+      args: ['--disable-notifications', '--start-maximized'],
+    });
+    this.page = await this.browser.newPage();
   }
   /**
    * @param  {string} url
@@ -36,7 +32,7 @@ class PageHelper {
       } catch (Exception) {
         i++;
         if (i === this.retryCount) {
-          throw new Error(Exception.toString());
+          throw Exception;
         }
       }
     }
@@ -52,58 +48,7 @@ class PageHelper {
       } catch (Exception) {
         i++;
         if (i === this.retryCount) {
-          throw new Error(Exception.toString());
-        }
-      }
-    }
-  }
-  /**
-   * @param  {any} fn
-   * @returns Promise
-   */
-  public async evaluate(fn: any): Promise<any> {
-    let i: number = 0;
-    while (i < this.retryCount) {
-      try {
-        return await this.page.evaluate(fn);
-      } catch (Exception) {
-        i++;
-        if (i === this.retryCount) {
-          throw new Error(Exception.toString());
-        }
-      }
-    }
-  }
-  /**
-   * @param  {string} element
-   * @returns Promise
-   */
-  public async waitForElement(element: string): Promise<ElementHandle> {
-    let i: number = 0;
-    while (i < this.retryCount) {
-      try {
-        return await this.page.waitForSelector(element);
-      } catch (Exception) {
-        i++;
-        if (i === this.retryCount) {
-          throw new Error(Exception.toString());
-        }
-      }
-    }
-  }
-  /**
-   * @param  {string} element
-   * @returns Promise
-   */
-  public async $(element: string): Promise<ElementHandle> {
-    let i: number = 0;
-    while (i < this.retryCount) {
-      try {
-        return await this.page.$(element);
-      } catch (Exception) {
-        i++;
-        if (i === this.retryCount) {
-          throw new Error(Exception.toString());
+          throw Exception;
         }
       }
     }
@@ -120,7 +65,7 @@ class PageHelper {
       } catch (Exception) {
         i++;
         if (i === this.retryCount) {
-          throw new Error(Exception.toString());
+          throw Exception;
         }
       }
     }
@@ -144,7 +89,7 @@ class PageHelper {
         } catch (Exception) {
           i++;
           if (i === this.retryCount) {
-            throw new Error(Exception.toString());
+            throw Exception;
           }
         }
       }
@@ -169,7 +114,7 @@ class PageHelper {
         } catch (Exception) {
           i++;
           if (i === this.retryCount) {
-            throw new Error(Exception.toString());
+            throw Exception;
           }
         }
       }
@@ -195,7 +140,7 @@ class PageHelper {
         } catch (Exception) {
           i++;
           if (i === this.retryCount) {
-            throw new Error(Exception.toString());
+            throw Exception;
           }
         }
       }
@@ -219,7 +164,7 @@ class PageHelper {
         } catch (Exception) {
           i++;
           if (i === this.retryCount) {
-            throw new Error(Exception.toString());
+            throw Exception;
           }
         }
       }
@@ -244,7 +189,7 @@ class PageHelper {
         } catch (Exception) {
           i++;
           if (i === this.retryCount) {
-            throw new Error(Exception.toString());
+            throw Exception;
           }
         }
       }
@@ -262,7 +207,7 @@ class PageHelper {
       } catch (Exception) {
         i++;
         if (i === this.retryCount) {
-          throw new Error(Exception.toString());
+          throw Exception;
         }
       }
     }
@@ -273,15 +218,11 @@ class PageHelper {
    * @returns Promise
    */
   public async enterText(element: ElementHandle, text: string): Promise<void> {
-    try {
-      await element.focus();
-      await element.type('');
-      await element.type(text);
-      await this.enterKeys('Enter');
-      await this.page.waitFor(500);
-    } catch (Exception) {
-      throw new Error(Exception.toString());
-    }
+    await element.focus();
+    await element.type('');
+    await element.type(text);
+    await this.enterKeys('Enter');
+    await this.page.waitFor(500);
   }
   /**
    * @param  {ElementHandle[]} elements
@@ -295,13 +236,13 @@ class PageHelper {
           await this.enterText(elements[i], text);
         }
       } else {
-        throw Error('No textboxes present!');
+        throw new Error('No textboxes present!');
       }
 
     } catch (Exception) {
       console.error(chalk.red(
           '\nFailed to wish! Most likely you have already wished your friends or due to below reason:'));
-      throw new Error(Exception.toString());
+      throw Exception;
     }
   }
 
@@ -322,7 +263,7 @@ class PageHelper {
     } catch (Exception) {
       console.error(chalk.red(
           '\nFailed to wish! Most likely you have already wished your friend or due to below reason:'));
-      throw new Error(Exception.toString());
+      throw Exception;
     }
   }
   /**
@@ -348,7 +289,7 @@ class PageHelper {
         } catch (Exception) {
           i++;
           if (i === this.retryCount) {
-            throw new Error(Exception.toString());
+            throw Exception;
           }
         }
       }
@@ -388,32 +329,6 @@ class PageHelper {
     }
   }
   /**
-   * @param  {string} element
-   * @returns Promise
-   */
-  public async isElementVisible(element: string): Promise<boolean> {
-    let i: number = 0;
-    while (i < this.retryCount) {
-      try {
-        const isVisible = await this.page.evaluate(() => {
-          const el = document.querySelector(element);
-          if (!el) {
-            return false;
-          }
-          const style = window.getComputedStyle(el);
-          return style && style.display !== 'none' && style.visibility !== 'hidden' &&
-              style.opacity !== '0';
-        });
-        return isVisible;
-      } catch (Exception) {
-        i++;
-        if (i === this.retryCount) {
-          throw new Error(Exception.toString());
-        }
-      }
-    }
-  }
-  /**
    * @returns Promise
    */
   public async logout(): Promise<void> {
@@ -423,15 +338,7 @@ class PageHelper {
       await this.page.waitFor(500);
     } catch (Exception) {
       console.error('\nLogout Failed! Most likely due to below reason');
-      throw new Error(Exception.toString());
-    }
-  }
-
-  public async close() {
-    try {
-      return await this.browser.close();
-    } catch (Exception) {
-      throw new Error(Exception.toString());
+      throw Exception;
     }
   }
 }
