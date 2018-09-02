@@ -100,6 +100,8 @@ class BirthdayWisher {
     birthdayNames.forEach((name: string) => {
       console.log(chalk.green(name + '\n'));
     });
+    config.birthdayNames = [];
+    await writeFile(config);
   }
 
   /**
@@ -192,20 +194,33 @@ class BirthdayWisher {
   public async findAndWishAll(credentials: any, wish: string) {
     try {
       if (await this.page.isElementExists(locators.birthdayTodayCard)) {
-        const birthdayNames = await this.fetchBirthdayNames();
-        const birthdayTexts = await this.fetchAllTexts();
-        if (config.birthdayNames.length > 0) {
-          await this.wishAll(config.birthdayNames, birthdayTexts, wish);
+        const today = new Date().getDay();
+        const birthdayTexts: ElementHandle[] = await this.fetchAllTexts();
+        if (!config.firstLogin) {
+          if (config.day === today) {
+            if (config.birthdayNames.length > 0) {
+              await this.wishAll(config.birthdayNames, birthdayTexts, wish);
+            } else if (config.birthdayNames.length === 0) {
+              throw new Error('You have wished all your friends, Please try tomorrow!');
+            }
+          } else {
+            config.day = today;
+            config.birthdayNames = await this.fetchBirthdayNames();
+            await writeFile(config);
+            await this.wishAll(config.birthdayNames, birthdayTexts, wish);
+          }
         } else {
-          await this.wishAll(birthdayNames, birthdayTexts, wish);
+          config.birthdayNames = await this.fetchBirthdayNames();
+          await writeFile(config);
+          await this.wishAll(config.birthdayNames, birthdayTexts, wish);
+          await encryptCredentials(credentials);
+          config.firstLogin = false;
+          await writeFile(config);
         }
       } else {
         console.error(
             '\n' + chalk.red('Uh oh, looks like none of your friends have birthdays today!\n'));
       }
-      await encryptCredentials(credentials);
-      config.firstLogin = false;
-      await writeFile(config);
       await this.page.logout();
       process.exit(0);
     } catch (Exception) {

@@ -23,6 +23,7 @@ program.command('wish')
     .option('-r, --reset', 'resets all config values to default')
     .action(async (options: any) => {
       try {
+        const today = new Date().getDay();
         if (options.reset) {
           config.firstLogin = true;
           config.save = false;
@@ -41,7 +42,7 @@ program.command('wish')
         let credentials: any;
         if (config.firstLogin) {
           console.log('\n');
-          config.day = new Date().getDay();
+          config.day = today;
           await writeFile(config);
           credentials = await inquirer.prompt([
             {
@@ -59,6 +60,9 @@ program.command('wish')
           console.log(chalk.yellowBright(loginText));
           await Wisher.login(credentials);
         } else {
+          if (config.day == today && config.birthdayNames.length === 0) {
+            throw new Error('You have wished all your friends, Please try tomorrow!');
+          }
           const savedCredentials: any = {};
           decryptCredentials(savedCredentials);
           console.log(chalk.yellowBright(loginText));
