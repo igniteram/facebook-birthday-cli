@@ -1,11 +1,12 @@
 /**
- * Below Test Utils code taken directly 
+ * Below Test Utils code taken directly
  * from angular/protractor-cookbook repository
  */
 
-import * as fs from 'fs';
 import * as child_process from 'child_process';
-let spawnSync = child_process.spawnSync;
+import * as fs from 'fs';
+
+const spawnSync = child_process.spawnSync;
 
 export class TestUtils {
   /**
@@ -14,8 +15,8 @@ export class TestUtils {
    * @param {string[]} taskArgs arguments to the task
    * @param {Object} options
    */
-  static runCommand(task: string, args: string[], options: any): string[] {
-    let child = spawnSync(task, args, options);
+  public static runCommand(task: string, args: string[], options: any): string[] {
+    const child = spawnSync(task, args, options);
     return child.output;
   }
 
@@ -24,9 +25,9 @@ export class TestUtils {
    * @param {string} file the file path
    * @returns {string[]} lines of a file
    */
-  static getFileLines(filePath: string): string[] {
-    let contents = fs.readFileSync(filePath).toString();
-    let lines = contents.split('\n');
+  public static getFileLines(filePath: string): string[] {
+    const contents = fs.readFileSync(filePath).toString();
+    const lines = contents.split('\n');
     return lines;
   }
 
@@ -36,9 +37,9 @@ export class TestUtils {
    * @param {string[]} file contents
    * @returns {boolean} if the line exists, return true
    */
-  static checkContent(content: string, fileLines: string[]): boolean {
+  public static checkContent(content: string, fileLines: string[]): boolean {
     for (let pos = 0; pos < fileLines.length; pos++) {
-      let line = fileLines[pos];
+      const line = fileLines[pos];
       if (line.indexOf(content) >= 0) {
         return true;
       }
@@ -46,9 +47,9 @@ export class TestUtils {
     return false;
   }
 
-  static checkContents(lines: string[], findLines: string[]): boolean {
+  public static checkContents(lines: string[], findLines: string[]): boolean {
     let found = true;
-    findLines.forEach(line => {
+    findLines.forEach((line) => {
       found = found && TestUtils.checkContent(line, lines);
     });
     if (!found) {
