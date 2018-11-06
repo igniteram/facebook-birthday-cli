@@ -1,9 +1,9 @@
 {
-    "firstLogin": true,
-    "save": false,
-    "username": "",
-    "password": "",
-    "wish": "",
-    "day": 0,
+    "firstLogin": false,
+    "save": true,
+    "username": "79f3603746a1b29374e4898590e642e4",
+    "password": "56b5d1a4aba189df8996ed823cd31eab370b997469e5f0fda064a97a1935ee2d",
+    "wish": "Wish you many many happy returns of the day!",
+    "day": 2,
     "birthdayNames": []
 }
