@@ -60,7 +60,7 @@ program.command('wish')
           console.log(chalk.yellowBright(loginText));
           await Wisher.login(credentials);
         } else {
-          if (config.day == today && config.birthdayNames.length === 0) {
+          if (config.day === today && config.birthdayNames.length === 0) {
             throw new Error('You have wished all your friends, Please try tomorrow!');
           }
           const savedCredentials: any = {};
