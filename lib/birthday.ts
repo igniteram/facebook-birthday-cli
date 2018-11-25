@@ -137,17 +137,13 @@ class BirthdayWisher {
       ]);
       if (moreWishes.friends) {
         await this.birthdayWish(credentials, birthdayNames, birthdayTexts);
-      } else {
-        await encryptCredentials(credentials);
-        config.firstLogin = false;
-        await writeFile(config);
       }
     }
   }
   /**
    * @param  {any} credentials
    */
-  public async findAndWish(credentials: any) {
+  public async findAndWish(credentials: any) {  // add a while loop to try 3 times
     try {
       if (await this.page.isElementExists(locators.birthdayTodayCard)) {
         const today = new Date().getDay();
@@ -170,6 +166,9 @@ class BirthdayWisher {
           config.birthdayNames = await this.fetchBirthdayNames();
           await writeFile(config);
           await this.birthdayWish(credentials, config.birthdayNames, birthdayTexts);
+          await encryptCredentials(credentials);
+          config.firstLogin = false;
+          await writeFile(config);
         }
       } else {
         console.error(
