@@ -14,6 +14,7 @@ const wishes: string[] = [
   'Wish you many many happy returns of the day!',
   'I want to write my own custom message!',
 ];
+let currentRetryCount: number = 0;
 
 class BirthdayWisher {
   public page = new PageHelper();
@@ -144,45 +145,51 @@ class BirthdayWisher {
    * @param  {any} credentials
    */
   public async findAndWish(credentials: any) {  // add a while loop to try 3 times
-    try {
-      if (await this.page.isElementExists(locators.birthdayTodayCard)) {
-        const today = new Date().getDay();
-        const birthdayTexts: ElementHandle[] = await this.fetchAllTexts();
-        if (!config.firstLogin) {
-          if (config.day === today) {
-            if (config.birthdayNames.length > 0) {
+    while (currentRetryCount < this.page.retryCount) {
+      try {
+        if (await this.page.isElementExists(locators.birthdayTodayCard)) {
+          const today = new Date().getDay();
+          const birthdayTexts: ElementHandle[] = await this.fetchAllTexts();
+          if (!config.firstLogin) {
+            if (config.day === today) {
+              if (config.birthdayNames.length > 0) {
+                await this.birthdayWish(credentials, config.birthdayNames, birthdayTexts);
+              } else if (config.birthdayNames.length === 0) {
+                // move this cli.ts, not first time login , skip login part!
+                throw new Error('You have wished all your friends, Please try tomorrow!');
+              }
+            } else {
+              config.day = today;
+              config.birthdayNames = await this.fetchBirthdayNames();
+              await writeFile(config);
               await this.birthdayWish(credentials, config.birthdayNames, birthdayTexts);
-            } else if (config.birthdayNames.length === 0) {
-              // move this cli.ts, not first time login , skip login part!
-              throw new Error('You have wished all your friends, Please try tomorrow!');
             }
           } else {
-            config.day = today;
             config.birthdayNames = await this.fetchBirthdayNames();
             await writeFile(config);
             await this.birthdayWish(credentials, config.birthdayNames, birthdayTexts);
+            await encryptCredentials(credentials);
+            config.firstLogin = false;
+            await writeFile(config);
           }
+          break;
         } else {
-          config.birthdayNames = await this.fetchBirthdayNames();
-          await writeFile(config);
-          await this.birthdayWish(credentials, config.birthdayNames, birthdayTexts);
-          await encryptCredentials(credentials);
-          config.firstLogin = false;
-          await writeFile(config);
+          currentRetryCount++;
+          if (currentRetryCount === this.page.retryCount) {
+            console.error(
+                '\n' + chalk.red('Uh oh, looks like none of your friends have birthdays today!\n'));
+            await this.page.logout();
+            process.exit(0);
+          }
         }
-      } else {
-        console.error(
-            '\n' + chalk.red('Uh oh, looks like none of your friends have birthdays today!\n'));
-      }
-      await this.page.logout();
-      process.exit(0);
-    } catch (Exception) {
-      console.error(chalk.red('\n' + Exception.toString() + '\n'));
-      try {
-        await this.page.logout();
-        process.exit(0);
       } catch (Exception) {
-        throw Exception;
+        console.error(chalk.red('\n' + Exception.toString() + '\n'));
+        try {
+          await this.page.logout();
+          process.exit(0);
+        } catch (Exception) {
+          throw Exception;
+        }
       }
     }
   }
@@ -191,44 +198,52 @@ class BirthdayWisher {
    * @param  {string} wish
    */
   public async findAndWishAll(credentials: any, wish: string) {
-    try {
-      if (await this.page.isElementExists(locators.birthdayTodayCard)) {
-        const today = new Date().getDay();
-        const birthdayTexts: ElementHandle[] = await this.fetchAllTexts();
-        if (!config.firstLogin) {
-          if (config.day === today) {
-            if (config.birthdayNames.length > 0) {
+    while (currentRetryCount < this.page.retryCount) {
+      try {
+        if (await this.page.isElementExists(locators.birthdayTodayCard)) {
+          const today = new Date().getDay();
+          const birthdayTexts: ElementHandle[] = await this.fetchAllTexts();
+          if (!config.firstLogin) {
+            if (config.day === today) {
+              if (config.birthdayNames.length > 0) {
+                await this.wishAll(config.birthdayNames, birthdayTexts, wish);
+              } else if (config.birthdayNames.length === 0) {
+                throw new Error('You have wished all your friends, Please try tomorrow!');
+              }
+            } else {
+              config.day = today;
+              config.birthdayNames = await this.fetchBirthdayNames();
+              await writeFile(config);
               await this.wishAll(config.birthdayNames, birthdayTexts, wish);
-            } else if (config.birthdayNames.length === 0) {
-              throw new Error('You have wished all your friends, Please try tomorrow!');
             }
           } else {
-            config.day = today;
             config.birthdayNames = await this.fetchBirthdayNames();
             await writeFile(config);
             await this.wishAll(config.birthdayNames, birthdayTexts, wish);
+            await encryptCredentials(credentials);
+            config.firstLogin = false;
+            await writeFile(config);
           }
+          break;
         } else {
-          config.birthdayNames = await this.fetchBirthdayNames();
-          await writeFile(config);
-          await this.wishAll(config.birthdayNames, birthdayTexts, wish);
-          await encryptCredentials(credentials);
-          config.firstLogin = false;
-          await writeFile(config);
+          currentRetryCount++;
+          if (currentRetryCount === this.page.retryCount) {
+            console.error(
+                '\n' + chalk.red('Uh oh, looks like none of your friends have birthdays today!\n'));
+            await this.page.logout();
+            process.exit(0);
+          }
         }
-      } else {
-        console.error(
-            '\n' + chalk.red('Uh oh, looks like none of your friends have birthdays today!\n'));
-      }
-      await this.page.logout();
-      process.exit(0);
-    } catch (Exception) {
-      console.error(chalk.red('\n' + Exception.toString() + '\n'));
-      try {
         await this.page.logout();
         process.exit(0);
       } catch (Exception) {
-        throw Exception;
+        console.error(chalk.red('\n' + Exception.toString() + '\n'));
+        try {
+          await this.page.logout();
+          process.exit(0);
+        } catch (Exception) {
+          throw Exception;
+        }
       }
     }
   }
