@@ -6,7 +6,7 @@ import {locators} from './locators';
 class PageHelper {
   private browser: Browser;
   private page: Page;
-  private readonly retryCount: number = 3;
+  public retryCount: number = 3;
 
   constructor() {
     this.browser = null;
