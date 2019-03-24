@@ -10,7 +10,7 @@ interface Locator {
   birthdayText: string;
 }
 const locators: Locator = {
-  url: 'https://www.facebook.com/events/birthdays/',
+  url: 'https://www.facebook.com/',
   username: '#email',
   password: '#pass',
   loginButton: '#loginbutton',

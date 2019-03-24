@@ -60,6 +60,8 @@ class BirthdayWisher {
         this.page.clickElement(locators.loginButton),
         this.page.waitForNavigation({waitUntil: 'networkidle2'}),
       ]);
+      await this.page.open(locators.url + '/events/birthdays');
+      await this.page.waitForNavigation({waitUntil: 'networkidle2'});
 
     } catch (Exception) {
       try {
@@ -145,8 +147,8 @@ class BirthdayWisher {
    * @param  {any} credentials
    */
   public async findAndWish(credentials: any) {  // add a while loop to try 3 times
-    while (currentRetryCount < this.page.retryCount) {
-      try {
+    try {
+      while (currentRetryCount < this.page.retryCount) {
         if (await this.page.isElementExists(locators.birthdayTodayCard)) {
           const today = new Date().getDay();
           const birthdayTexts: ElementHandle[] = await this.fetchAllTexts();
@@ -182,14 +184,16 @@ class BirthdayWisher {
             process.exit(0);
           }
         }
+      }
+      await this.page.logout();
+      process.exit(0);
+    } catch (Exception) {
+      console.error(chalk.red('\n' + Exception.toString() + '\n'));
+      try {
+        await this.page.logout();
+        process.exit(0);
       } catch (Exception) {
-        console.error(chalk.red('\n' + Exception.toString() + '\n'));
-        try {
-          await this.page.logout();
-          process.exit(0);
-        } catch (Exception) {
-          throw Exception;
-        }
+        throw Exception;
       }
     }
   }
@@ -198,8 +202,8 @@ class BirthdayWisher {
    * @param  {string} wish
    */
   public async findAndWishAll(credentials: any, wish: string) {
-    while (currentRetryCount < this.page.retryCount) {
-      try {
+    try {
+      while (currentRetryCount < this.page.retryCount) {
         if (await this.page.isElementExists(locators.birthdayTodayCard)) {
           const today = new Date().getDay();
           const birthdayTexts: ElementHandle[] = await this.fetchAllTexts();
@@ -234,16 +238,16 @@ class BirthdayWisher {
             process.exit(0);
           }
         }
+      }
+      await this.page.logout();
+      process.exit(0);
+    } catch (Exception) {
+      console.error(chalk.red('\n' + Exception.toString() + '\n'));
+      try {
         await this.page.logout();
         process.exit(0);
       } catch (Exception) {
-        console.error(chalk.red('\n' + Exception.toString() + '\n'));
-        try {
-          await this.page.logout();
-          process.exit(0);
-        } catch (Exception) {
-          throw Exception;
-        }
+        throw Exception;
       }
     }
   }

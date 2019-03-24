@@ -7,7 +7,7 @@ import {BirthdayWisher, wishes} from './birthday';
 import {decryptCredentials, writeFile} from './utils/config';
 
 const pkg: any = require('../package.json');
-const loginText: string = '\nPlease wait! Logging in...\n';
+const loginText: string = '\nPlease wait! Logging & Fetching Birthdays!...\n';
 
 program.version(pkg.version)
     .description('Facebook Birthday CLI')
