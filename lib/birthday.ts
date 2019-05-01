@@ -61,7 +61,6 @@ class BirthdayWisher {
         this.page.waitForNavigation({waitUntil: 'networkidle2'}),
       ]);
       await this.page.open(locators.url + '/events/birthdays');
-      await this.page.waitForNavigation({waitUntil: 'networkidle2'});
 
     } catch (Exception) {
       try {
@@ -152,13 +151,10 @@ class BirthdayWisher {
         if (await this.page.isElementExists(locators.birthdayTodayCard)) {
           const today = new Date().getDay();
           const birthdayTexts: ElementHandle[] = await this.fetchAllTexts();
-          if (!config.firstLogin) {
+          if (config.firstLogin === false) {
             if (config.day === today) {
               if (config.birthdayNames.length > 0) {
                 await this.birthdayWish(credentials, config.birthdayNames, birthdayTexts);
-              } else if (config.birthdayNames.length === 0) {
-                // move this cli.ts, not first time login , skip login part!
-                throw new Error('You have wished all your friends, Please try tomorrow!');
               }
             } else {
               config.day = today;
@@ -168,7 +164,6 @@ class BirthdayWisher {
             }
           } else {
             config.birthdayNames = await this.fetchBirthdayNames();
-            await writeFile(config);
             await this.birthdayWish(credentials, config.birthdayNames, birthdayTexts);
             await encryptCredentials(credentials);
             config.firstLogin = false;
@@ -211,8 +206,6 @@ class BirthdayWisher {
             if (config.day === today) {
               if (config.birthdayNames.length > 0) {
                 await this.wishAll(config.birthdayNames, birthdayTexts, wish);
-              } else if (config.birthdayNames.length === 0) {
-                throw new Error('You have wished all your friends, Please try tomorrow!');
               }
             } else {
               config.day = today;
@@ -222,7 +215,6 @@ class BirthdayWisher {
             }
           } else {
             config.birthdayNames = await this.fetchBirthdayNames();
-            await writeFile(config);
             await this.wishAll(config.birthdayNames, birthdayTexts, wish);
             await encryptCredentials(credentials);
             config.firstLogin = false;
