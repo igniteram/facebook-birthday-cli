@@ -175,7 +175,6 @@ class BirthdayWisher {
           if (currentRetryCount === this.page.retryCount) {
             console.error(
                 '\n' + chalk.red('Uh oh, looks like none of your friends have birthdays today!\n'));
-            await this.page.logout();
             process.exit(0);
           }
         }
@@ -226,7 +225,6 @@ class BirthdayWisher {
           if (currentRetryCount === this.page.retryCount) {
             console.error(
                 '\n' + chalk.red('Uh oh, looks like none of your friends have birthdays today!\n'));
-            await this.page.logout();
             process.exit(0);
           }
         }
