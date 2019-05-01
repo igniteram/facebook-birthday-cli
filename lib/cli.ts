@@ -40,7 +40,7 @@ program.command('wish')
         }
         const Wisher = new BirthdayWisher();
         let credentials: any;
-        if (config.firstLogin) {
+        if (config.firstLogin === true) {
           console.log('\n');
           config.day = today;
           await writeFile(config);
@@ -61,7 +61,11 @@ program.command('wish')
           await Wisher.login(credentials);
         } else {
           if (config.day === today && config.birthdayNames.length === 0) {
-            throw new Error('You have wished all your friends, Please try tomorrow!');
+            console.error(chalk.red(
+                '\n' +
+                'You have wished all your friends, Please try tomorrow!' +
+                '\n'));
+            process.exit(0);
           }
           const savedCredentials: any = {};
           decryptCredentials(savedCredentials);
