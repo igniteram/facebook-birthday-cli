@@ -334,7 +334,7 @@ class PageHelper {
   public async logout(): Promise<void> {
     try {
       await this.clickElement(locators.logoutLink);
-      await this.xpathClick(locators.loginButton);
+      await this.xpathClick(locators.logoutButton);
       await this.page.waitFor(500);
     } catch (Exception) {
       console.error('\nLogout Failed! Most likely due to below reason');
