@@ -1,6 +1,6 @@
 {
   "name": "facebook-birthday-cli",
-  "version": "0.9.2",
+  "version": "1.0.0",
   "description": "Never miss out to wish your facebook friends!",
   "main": "built/cli.js",
   "scripts": {

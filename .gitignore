@@ -3,3 +3,4 @@ node_modules
 *-lock.json
 built
 .*DS_Store
+config.json

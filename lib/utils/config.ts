@@ -1,5 +1,4 @@
 import {decrypt, encrypt} from './crypto';
-const config = require('../../resources/config.json');
 const {getInstalledPath} = require('get-installed-path');
 
 import chalk from 'chalk';
@@ -9,14 +8,15 @@ import {promisify} from 'util';
 
 const writeFileAsync = promisify(fs.writeFile.bind(fs));
 
+async function getConfigPath(): Promise<string> {
+  return path.join(await getInstalledPath('facebook-birthday-cli'), '/config.json');
+}
 /**
  * @param  {any} file
  */
 async function writeFile(file: any) {
   try {
-    await writeFileAsync(
-        path.join(await getInstalledPath('facebook-birthday-cli'), '/resources/config.json'),
-        JSON.stringify(file, null, 4));
+    await writeFileAsync(await getConfigPath(), JSON.stringify(file, null, 4));
   } catch (Exception) {
     console.error(
         chalk.red('\nFailed to update config.json file! Most likely due to below reason: ') + '\n' +
@@ -24,10 +24,17 @@ async function writeFile(file: any) {
   }
 }
 
+async function configFileExists(): Promise<boolean> {
+  if (fs.existsSync(await getConfigPath())) {
+    return true;
+  }
+  return false;
+}
+
 /**
  * @param  {any} answers
  */
-function encryptCredentials(answers: any) {
+function encryptCredentials(config: any, answers: any) {
   try {
     config.username = encrypt(answers.username);
     config.password = encrypt(answers.password);
@@ -39,7 +46,7 @@ function encryptCredentials(answers: any) {
 /**
  * @param  {any} answers
  */
-function decryptCredentials(answers: any) {
+function decryptCredentials(config: any, answers: any) {
   try {
     answers.username = decrypt(config.username);
     answers.password = decrypt(config.password);
@@ -48,4 +55,4 @@ function decryptCredentials(answers: any) {
   }
 }
 
-export {encryptCredentials, decryptCredentials, writeFile};
+export {getConfigPath, writeFile, configFileExists, encryptCredentials, decryptCredentials};
