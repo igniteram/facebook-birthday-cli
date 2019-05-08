@@ -8,6 +8,8 @@
       "no-var-keyword": true,
       "no-var-requires": false,
       "no-string-literal":false,
+      "no-shadowed-variable": false,
+      "no-unused-expression": true,
       "quotemark": [true, "single", "avoid-escape"],
       "semicolon": [true],
       "variable-name": [true, "ban-keywords"],
@@ -17,7 +19,6 @@
       "object-literal-sort-keys": false,
       "triple-equals": [true, "allow-null-check"],
       "interface-name" : [true, "never-prefix"],
-      "no-shadowed-variable": false,
       "prefer-for-of": false,
       "trailing-comma": [
         true,

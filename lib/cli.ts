@@ -1,10 +1,22 @@
+import chalk from 'chalk';
 import * as program from 'commander';
 import * as inquirer from 'inquirer';
 
-const config = require('../resources/config.json');
-import chalk from 'chalk';
 import {BirthdayWisher, wishes} from './birthday';
-import {decryptCredentials, writeFile} from './utils/config';
+import {configFileExists, decryptCredentials, getConfigPath, writeFile} from './utils/config';
+
+const configBirthdayNames: string[] = [];
+
+let config: any = {
+  firstLogin: true,
+  save: false,
+  username: '',
+  password: '',
+  birthday: true,
+  wish: '',
+  day: 1,
+  birthdayNames: configBirthdayNames,
+};
 
 const pkg: any = require('../package.json');
 const loginText: string = '\nPlease wait! Logging & Fetching Birthdays!...\n';
@@ -23,83 +35,86 @@ program.command('wish')
     .option('-r, --reset', 'resets all config values to default')
     .action(async (options: any) => {
       try {
-        const today = new Date().getDay();
+        if (!await configFileExists()) {
+          await writeFile(config);
+        }
+        const savedConfig = require(await getConfigPath());
         if (options.reset) {
-          config.firstLogin = true;
-          config.save = false;
-          const keys = Object.keys(config);
-          for (let i: number = 2; i < 5; i++) {
-            config[keys[i]] = '';
-          }
-          config.day = 1;
-          config.birthdayNames = [];
           await writeFile(config);
           console.log(chalk.green(
               '\nSuccessfully reset to default values! Please run "facebook wish" to start over.\n'));
-          process.exit(0);
-        }
-        const Wisher = new BirthdayWisher();
-        let credentials: any;
-        if (config.firstLogin === true) {
-          console.log('\n');
-          config.day = today;
-          await writeFile(config);
-          credentials = await inquirer.prompt([
-            {
-              message: 'Please enter your facebook username:',
-              name: 'username',
-              type: 'input',
-            },
-            {
-              message: 'Please enter your facebook password:',
-              name: 'password',
-              mask: '*',
-              type: 'password',
-            },
-          ]);
-          console.log(chalk.yellowBright(loginText));
-          await Wisher.login(credentials);
         } else {
-          if (config.day === today && config.birthdayNames.length === 0) {
-            console.error(chalk.red(
-                '\n' +
-                'You have wished all your friends, Please try tomorrow!' +
-                '\n'));
-            process.exit(0);
-          }
-          const savedCredentials: any = {};
-          decryptCredentials(savedCredentials);
-          console.log(chalk.yellowBright(loginText));
-          await Wisher.login(savedCredentials);
-        }
-        if (!options.all) {
-          await Wisher.findAndWish(credentials);
-        } else {
-          if (!config.save) {
-            wishes.splice(wishes.indexOf('custom message'), 1);
-            const answer: any = await inquirer.prompt([
+          const today = new Date().getDay();
+          const Wisher = new BirthdayWisher();
+          let credentials: any;
+          if (savedConfig.firstLogin === true) {
+            console.log('\n');
+            config.day = today;
+            credentials = await inquirer.prompt([
               {
-                choices: wishes,
-                message: 'Select your favourite birthday wish:',
-                name: 'wish',
-                type: 'list',
+                message: 'Please enter your facebook username:',
+                name: 'username',
+                type: 'input',
               },
               {
-                default: true,
-                message: 'Do you want to save this configuration?',
-                name: 'config',
-                type: 'confirm',
+                message: 'Please enter your facebook password:',
+                name: 'password',
+                mask: '*',
+                type: 'password',
               },
             ]);
-            if (answer.config) {
-              config.save = true;
-              config.wish = answer.wish;
-              await writeFile(config);
-            }
-            await Wisher.findAndWishAll(credentials, answer.wish);
+            console.log(chalk.yellowBright(loginText));
+            config = await Wisher.login(credentials, config, savedConfig);
           } else {
-            await Wisher.findAndWishAll(credentials, config.wish);
+            if (savedConfig.birthday === false) {
+              console.error(chalk.red(
+                  '\n' +
+                  'Today none of your friends have birthdays, Please try tomorrow!' +
+                  '\n'));
+              process.exit(0);
+            }
+            if (savedConfig.day === today && savedConfig.birthdayNames.length === 0) {
+              console.error(chalk.red(
+                  '\n' +
+                  'You have wished all your friends, Please try tomorrow!' +
+                  '\n'));
+              process.exit(0);
+            }
+            const savedCredentials: any = {};
+            decryptCredentials(savedConfig, savedCredentials);
+            console.log(chalk.yellowBright(loginText));
+            config = await Wisher.login(savedCredentials, config, savedConfig);
           }
+          if (!options.all) {
+            config = await Wisher.findAndWish(config, savedConfig);
+          } else {
+            if (!savedConfig.save) {
+              wishes.splice(wishes.indexOf('custom message'), 1);
+              const answer: any = await inquirer.prompt([
+                {
+                  choices: wishes,
+                  message: 'Select your favourite birthday wish:',
+                  name: 'wish',
+                  type: 'list',
+                },
+                {
+                  default: true,
+                  message: 'Do you want to save this message?',
+                  name: 'message',
+                  type: 'confirm',
+                },
+              ]);
+              if (answer.message) {
+                config.save = true;
+                config.wish = answer.wish;
+              }
+              config = await Wisher.findAndWishAll(answer.wish, config, savedConfig);
+            } else {
+              config = await Wisher.findAndWishAll(savedConfig.wish, config, savedConfig);
+            }
+          }
+          await writeFile(config);
+          process.exit(0);
         }
       } catch (Exception) {
         console.error(chalk.red('\n' + Exception.toString() + '\n'));

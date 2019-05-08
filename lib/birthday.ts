@@ -4,9 +4,8 @@ import * as inquirer from 'inquirer';
 import {ElementHandle} from 'puppeteer';
 import {locators} from './helpers/locators';
 import {PageHelper} from './helpers/pageHelper';
-import {encryptCredentials, writeFile} from './utils/config';
+import {encryptCredentials} from './utils/config';
 
-const config = require('../resources/config.json');
 const wishes: string[] = [
   'Happy Birthday!',
   'Happy Birthday Buddy!',
@@ -46,20 +45,28 @@ class BirthdayWisher {
   /**
    * @param  {any} answers
    */
-  public async login(answers: any) {
+  public async login(credentials: any, config: any, savedConfig: any) {
     try {
       await this.page.init();
       await this.page.open(locators.url);
       await this.page.focusElement(locators.username);
       await this.page.clearElement(locators.username);
-      await this.page.sendElementText(locators.username, answers.username);
+      await this.page.sendElementText(locators.username, credentials.username);
       await this.page.focusElement(locators.password);
       await this.page.clearElement(locators.password);
-      await this.page.sendElementText(locators.password, answers.password);
-      await Promise.all([
-        this.page.clickElement(locators.loginButton),
-        this.page.waitForNavigation({waitUntil: 'networkidle2'}),
-      ]);
+      await this.page.sendElementText(locators.password, credentials.password);
+      try {
+        await Promise.all([
+          this.page.clickElement(locators.loginButton),
+          this.page.waitForNavigation({waitUntil: 'networkidle2'}),
+        ]);
+        if (savedConfig.firstLogin) {
+          await encryptCredentials(config, credentials);
+          config.firstLogin = false;
+        }
+      } catch (Exception) {
+        throw new Error(Exception);
+      }
       await this.page.open(locators.url + '/events/birthdays');
 
     } catch (Exception) {
@@ -67,7 +74,6 @@ class BirthdayWisher {
         config.firstLogin = true;
         config.username = '';
         config.password = '';
-        await writeFile(config);
         const title = await this.page.getTitle();
         if (title.indexOf('Events') === -1) {
           throw new Error(
@@ -78,6 +84,7 @@ class BirthdayWisher {
         throw Exception;
       }
     }
+    return config;
   }
   /**
    * @returns Promise<string[]>
@@ -96,22 +103,22 @@ class BirthdayWisher {
    * @param  {string[]} birthdayNames
    * @param  {ElementHandle[]} birthdayTexts
    */
-  public async wishAll(birthdayNames: string[], birthdayTexts: ElementHandle[], wish: string) {
+  public async wishAll(
+      birthdayNames: string[], birthdayTexts: ElementHandle[], wish: string, config: any) {
     await this.page.enterAllElementText(birthdayTexts, wish);
     console.log(chalk.green('\nSuccessfully wished:\n'));
     birthdayNames.forEach((name: string) => {
       console.log(chalk.green(name + '\n'));
     });
     config.birthdayNames = [];
-    await writeFile(config);
+    return config;
   }
 
   /**
    * @param  {string[]} birthdayNames
    * @param  {ElementHandle[]} birthdayTexts
    */
-  public async birthdayWish(
-      credentials: any, birthdayNames: string[], birthdayTexts: ElementHandle[]) {
+  public async birthdayWish(birthdayNames: string[], birthdayTexts: ElementHandle[], config: any) {
     let indexOfBirthdayName: number;
     const birthdayAnswers: any = await this.birthdayQuestions(birthdayNames);
     indexOfBirthdayName = birthdayNames.indexOf(birthdayAnswers.birthdayName);
@@ -126,7 +133,6 @@ class BirthdayWisher {
     console.log(chalk.green('\nSuccessfully wished ' + birthdayAnswers.birthdayName) + '\n');
     birthdayNames.splice(indexOfBirthdayName, 1);
     config.birthdayNames = birthdayNames;
-    await writeFile(config);
 
     if (birthdayNames.length > 0) {
       const moreWishes: any = await inquirer.prompt([
@@ -138,36 +144,33 @@ class BirthdayWisher {
         },
       ]);
       if (moreWishes.friends) {
-        await this.birthdayWish(credentials, birthdayNames, birthdayTexts);
+        await this.birthdayWish(birthdayNames, birthdayTexts, config);
       }
     }
+    return config;
   }
   /**
    * @param  {any} credentials
    */
-  public async findAndWish(credentials: any) {  // add a while loop to try 3 times
+  public async findAndWish(config: any, savedConfig: any) {
     try {
       while (currentRetryCount < this.page.retryCount) {
         if (await this.page.isElementExists(locators.birthdayTodayCard)) {
           const today = new Date().getDay();
           const birthdayTexts: ElementHandle[] = await this.fetchAllTexts();
-          if (config.firstLogin === false) {
-            if (config.day === today) {
-              if (config.birthdayNames.length > 0) {
-                await this.birthdayWish(credentials, config.birthdayNames, birthdayTexts);
+          if (savedConfig.firstLogin === false) {
+            if (savedConfig.day === today) {
+              if (savedConfig.birthdayNames.length > 0) {
+                await this.birthdayWish(savedConfig.birthdayNames, birthdayTexts, savedConfig);
               }
             } else {
               config.day = today;
-              config.birthdayNames = await this.fetchBirthdayNames();
-              await writeFile(config);
-              await this.birthdayWish(credentials, config.birthdayNames, birthdayTexts);
+              const birthdayNames = await this.fetchBirthdayNames();
+              await this.birthdayWish(birthdayNames, birthdayTexts, config);
             }
           } else {
-            config.birthdayNames = await this.fetchBirthdayNames();
-            await this.birthdayWish(credentials, config.birthdayNames, birthdayTexts);
-            await encryptCredentials(credentials);
-            config.firstLogin = false;
-            await writeFile(config);
+            const birthdayNames = await this.fetchBirthdayNames();
+            await this.birthdayWish(birthdayNames, birthdayTexts, config);
           }
           break;
         } else {
@@ -175,49 +178,39 @@ class BirthdayWisher {
           if (currentRetryCount === this.page.retryCount) {
             console.error(
                 '\n' + chalk.red('Uh oh, looks like none of your friends have birthdays today!\n'));
-            process.exit(0);
+            config.birthday = false;
           }
         }
       }
       await this.page.logout();
-      process.exit(0);
     } catch (Exception) {
       console.error(chalk.red('\n' + Exception.toString() + '\n'));
-      try {
-        await this.page.logout();
-        process.exit(0);
-      } catch (Exception) {
-        throw Exception;
-      }
     }
+    return config;
   }
   /**
    * @param  {any} credentials
    * @param  {string} wish
    */
-  public async findAndWishAll(credentials: any, wish: string) {
+  public async findAndWishAll(wish: string, config: any, savedConfig: any) {
     try {
       while (currentRetryCount < this.page.retryCount) {
         if (await this.page.isElementExists(locators.birthdayTodayCard)) {
           const today = new Date().getDay();
           const birthdayTexts: ElementHandle[] = await this.fetchAllTexts();
-          if (!config.firstLogin) {
-            if (config.day === today) {
-              if (config.birthdayNames.length > 0) {
-                await this.wishAll(config.birthdayNames, birthdayTexts, wish);
+          if (!savedConfig.firstLogin) {
+            if (savedConfig.day === today) {
+              if (savedConfig.birthdayNames.length > 0) {
+                await this.wishAll(savedConfig.birthdayNames, birthdayTexts, wish, savedConfig);
               }
             } else {
               config.day = today;
-              config.birthdayNames = await this.fetchBirthdayNames();
-              await writeFile(config);
-              await this.wishAll(config.birthdayNames, birthdayTexts, wish);
+              const birthdayNames = await this.fetchBirthdayNames();
+              await this.wishAll(birthdayNames, birthdayTexts, wish, config);
             }
           } else {
-            config.birthdayNames = await this.fetchBirthdayNames();
-            await this.wishAll(config.birthdayNames, birthdayTexts, wish);
-            await encryptCredentials(credentials);
-            config.firstLogin = false;
-            await writeFile(config);
+            const birthdayNames = await this.fetchBirthdayNames();
+            await this.wishAll(birthdayNames, birthdayTexts, wish, config);
           }
           break;
         } else {
@@ -225,21 +218,15 @@ class BirthdayWisher {
           if (currentRetryCount === this.page.retryCount) {
             console.error(
                 '\n' + chalk.red('Uh oh, looks like none of your friends have birthdays today!\n'));
-            process.exit(0);
+            config.birthday = false;
           }
         }
       }
       await this.page.logout();
-      process.exit(0);
     } catch (Exception) {
       console.error(chalk.red('\n' + Exception.toString() + '\n'));
-      try {
-        await this.page.logout();
-        process.exit(0);
-      } catch (Exception) {
-        throw Exception;
-      }
     }
+    return config;
   }
 }
 
