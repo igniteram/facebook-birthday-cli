@@ -10,6 +10,7 @@ test/
 
 # dev files
 
+config.json
 .gitignore
 .gitattributes
 .npmignore
