@@ -1,6 +1,6 @@
 {
   "name": "facebook-birthday-cli",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Never miss out to wish your facebook friends!",
   "main": "built/cli.js",
   "scripts": {
@@ -37,12 +37,12 @@
     "@types/chalk": "^2.2.0",
     "@types/commander": "^2.12.2",
     "@types/inquirer": "0.0.42",
-    "@types/jest": "^23.1.6",
+    "@types/jest": "^24.0.18",
     "@types/node": "^10.5.2",
     "@types/puppeteer": "^1.5.0",
     "chalk": "^2.4.1",
     "clang-format": "^1.2.4",
-    "jest": "^24.7.1",
+    "jest": "^24.9.0",
     "tslint": "^5.10.0",
     "tslint-eslint-rules": "^5.3.1",
     "typescript": "^2.9.2"

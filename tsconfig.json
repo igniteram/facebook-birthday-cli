@@ -8,7 +8,7 @@
     "removeComments": false,
     "noImplicitAny": true,
     "outDir": "built/",
-    "typeRoots": [ "./node_modules/@types","./built" ],
+    "skipLibCheck": true,
     "types": [
       "node",
       "inquirer",
